@@ -4,7 +4,6 @@
       <SearchFilter ref='searchFilter' :haveMonth="haveMonth" :haveType="haveType" :haveCategory="haveCategory" @receiveData="showData">
            <el-button type="primary"
                    @click="onAdd">新增账单</el-button>
-            </el-form-item>
       </SearchFilter>
       </el-container>
       <el-container>
@@ -14,7 +13,6 @@
                   style="width: 100%;"
                   :height="height"
                   :default-sort = "{prop: 'time', order: 'descending'}">
-          </el-table-column>
           <el-table-column prop="time" sortable
                            label="时间"></el-table-column>
           <el-table-column prop="type" sortable
@@ -33,6 +31,7 @@
                  center>
         <el-form ref="form"
                  :model="form"
+                 :rules="rules"
                  label-width="60px">
           <el-form-item label="时间">
               <el-date-picker style="width:100%" v-model="form.date1" type="datetime" placeholder="选择日期时间"></el-date-picker>
@@ -49,8 +48,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="金额"
-                        prop="amount"
-                        :rules="[{ required: true, message: '金额不能为空'},{ type: 'number', message: '金额必须为数字'}]">
+                        prop="amount">
             <el-input type="number"
                       v-model.number="form.amount"
                       autocomplete="off"></el-input>
@@ -146,6 +144,11 @@ export default {
         type: '',
         category: '',
         amount: ''
+      },
+      rules:{
+          date1: [{required: true,type: 'datetime',message: '时间不能为空',trigger: 'change'}],
+          category: [{required: true,message: '分类不能为空',trigger: 'change'}],
+          amount: [{ required: true, message: '金额不能为空'},{ type: 'number', message: '金额必须为数字'}]
       }
     }
   },
@@ -187,7 +190,33 @@ export default {
          this.form.amount = ''
          this.centerDialogVisible = false
     },
+    checkParam() {
+        if(this.form.date1 == '') {
+            this.$message({
+                message: '请选择时间',
+                type: 'error'
+            });
+            return false
+        }
+         if(this.form.category == '') {
+             this.$message({
+                message: '请选择分类',
+                type: 'error'
+            });
+            return false
+        }
+         if(this.form.amount == '') {
+             this.$message({
+                message: '请填写金额',
+                type: 'error'
+            });
+            return false
+        }
+        return true
+    },
     addBill() {
+        var bool = this.checkParam();
+        if (!bool) return false
         this.centerDialogVisible = false
         var type = this.getType(this.form.category)
         var data = {
